@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EEE Smart Attendance Monitoring System</title>
+    <link rel="icon" href="EEE LOGO.png">
+
+    <style>
+        body {
+            background-color: #0f172a;
+            color: white;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #38bdf8;
+            font-size: 50px;
+            margin-left: 160px;
+            margin-right: 180px;
+        }
+
+        h2 {
+            color: #cbd5e1;
+            font-size: 30px;
+        }
+
+        p {
+            color: #cbd5e1;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        #clock {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #38bdf8;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        #date {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            color: #cbd5e1;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-spacing: 10px;
+            margin: auto;
+            margin-top: 50px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .logo {
+            border-radius: 20px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 120px;
+            height: auto;
+        }
+
+        .holiday {
+            color: #f87171;
+            font-size: 50px;
+            font-weight: bold;
+        }
+
+        .barcode-hardware-container {
+            margin: 50px auto 0 auto;
+            width: 85%;
+            max-width: 550px;
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            border: 1px solid #334155;
+            margin-top: 2px;
+        }
+
+        .barcode-hardware-container h3 {
+            margin-top: 0;
+            color: #38bdf8;
+        }
+
+        .barcode-slot-input {
+            width: 90%;
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            outline: none;
+        }
+
+        .barcode-slot-input:focus {
+            border-color: #38bdf8;
+        }
+
+        #scan-message {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 25px;
+        }
+
+        .action-buttons-row {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .excel-btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .excel-btn:hover {
+            background: #16a34a;
+        }
+
+        .college-name {
+            color: #f87171;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <img src="psn logo pic.png" alt="psn logo" class="logo">
+
+
+    <div id="mainContent">
+        <div id="clock"></div>
+        <div id="date"></div>
+
+
+        <h1>DEPARTMENT OF ELECTRICAL AND ELECTRONICS ENGINEERING</h1>
+        <h2>SMART ATTENDANCE MONITORING SYSTEM</h2>
+        <div id="timetable"></div>
+    </div><br>
+
+    <div class="barcode-hardware-container">
+        <h3>[ LIVE BARCODE ]</h3>
+        <input type="text" id="barcodeSlot" class="barcode-slot-input" placeholder="Scan Student Card ID" autofocus>
+
+        <div id="scan-message">System Ready. Ready To Scan...</div>
+
+        <div class="action-buttons-row">
+            <button class="excel-btn" id="downloadExcelBtn">Download Attendance Sheet</button>
+        </div>
+    </div>
+
+    <script>
+          const totalStrength = {
+            "II/3rd SEM": 47,
+            "III/5th SEM": 17,
+            "IV/7th SEM": 36
+        };
+
+        //student information\\
+
+        const studentDatabase = {
+
+
+            "95222504001": { name: "AKASH.R", reg: "95222504001", year: "II/3rd SEM" },
+            "95222504002": { name: "ANOKE.M", reg: " 95222504002", year: "II/3rd SEM" },
+            "95222504003": { name: "ANTO RIJOE.I", reg: "95222504003", year: "II/3rd SEM" },
+            "95222504004": { name: "ANTONY ASISH.R", reg: "95222504004", year: "II/3rd SEM" },
+            "95222504005": { name: "ANTONY SAHAYA BRIJESH.J", reg: "95222504005", year: "II/3rd SEM" },
+            "95222504006": { name: "ARUN PRAKASH.A.S", reg: "95222504006", year: "II/3rd SEM" },
+            "95222504007": { name: "ARUNKUMAR.K", reg: "95222504007", year: "II/3rd SEM" },
+            "95222504008": { name: "BAGESH.N", reg: "95222504008", year: "II/3rd SEM" },
+            "95222504009": { name: "BALA ASWIN.C", reg: "95222504009", year: "II/3rd SEM" },
+            "95222504010": { name: "BEER BANU.M", reg: "95222504010", year: "II/3rd SEM" },
+            "95222504011": { name: "BOOPATHI.K", reg: "95222504011", year: "II/3rd SEM" },
+            "95222504012": { name: "DASTIN.D", reg: "95222504012", year: "II/3rd SEM" },
+            "95222504013": { name: "DIVYA BHARATHI.K", reg: "95222504013", year: "II/3rd SEM" },
+            "95222504014": { name: "EBIN .A", reg: "95222504014", year: "II/3rd SEM" },
+            "95222504016": { name: "INDHUMATHI.D", reg: "95222504016", year: "II/3rd SEM" },
+            "95222504017": { name: "KALAIRAJ @ RAHUL.S", reg: "95222504017", year: "II/3rd SEM" },
+            "95222504019": { name: "MANOJ KUMAR.K", reg: "95222504019", year: "II/3rd SEM" },
+            "95222504020": { name: "MATHISH.P", reg: "95222504020", year: "II/3rd SEM" },
+            "95222504021": { name: "MICHAEL MITHUNA.A", reg: "95222504021", year: "II/3rd SEM" },
+            "95222504022": { name: "MUTHU KRISHNAN.M", reg: "95222504022", year: "II/3rd SEM" },
+            "95222504023": { name: "NALLAMMAL.R", reg: "95222504023", year: "II/3rd SEM" },
+            "95222504024": { name: "NAMBIRAJ.M", reg: "95222504024", year: "II/3rd SEM" },
+            "95222504025": { name: "PADMASHREE.M", reg: "95222504025", year: "II/3rd SEM" },
+            "95222504026": { name: "PRAKASH PANdIYAN.G", reg: "95222504026", year: "II/3rd SEM" },
+            "95222504028": { name: "PUGAZHENTHI.N", reg: "95222504028", year: "II/3rd SEM" },
+            "95222504029": { name: "RASMAN.S", reg: "95222504029", year: "II/3rd SEM" },
+            "95222504030": { name: "RENIS.K", reg: "95222504030", year: "II/3rd SEM" },
+            "95222504031": { name: "RISHIKADEVI.S", reg: "95222504031", year: "II/3rd SEM" },
+            "95222504032": { name: "RITHISH.V", reg: "95222504032", year: "II/3rd SEM" },
+            "95222504033": { name: "SAHAANA.K", reg: "95222504033", year: "II/3rd SEM" },
+            "95222504034": { name: "SANMUGAVEL.S", reg: "95222504034", year: "II/3rd SEM" },
+            "95222504035": { name: "SARAN.S", reg: "95222504035", year: "II/3rd SEM" },
+            "95222504036": { name: "SBENO ASWIN.S", reg: "95222504036", year: "II/3rd SEM" },
+            "95222504037": { name: "SIMIYON.S", reg: "95222504037", year: "II/3rd SEM" },
+            "95222504038": { name: "SIVA .G.T", reg: "95222504038", year: "II/3rd SEM" },
+            "95222504039": { name: "SIVA GANESH.S", reg: "95222504039", year: "II/3rd SEM" },
+            "95222504040": { name: "SRIVALLI NATHAN.M", reg: "95222504040", year: "II/3rd SEM" },
+            "95222504041": { name: "SUBASH.A", reg: "95222504041", year: "II/3rd SEM" },
+            "95222504042": { name: "THANGARAJ.D", reg: "95222504042", year: "II/3rd SEM" },
+            "95222504043": { name: "UDHAYASANKAR RAJ.B", reg: "95222504043", year: "II/3rd SEM" },
+            "95222504044": { name: "VENUSRI.A", reg: "95222504044", year: "II/3rd SEM" },
+            "95222504045": { name: "VIVIN FFRANCS", reg: "95222504045", year: "II/3rd SEM" },
+            "95222504046": { name: "YUVAN SANKAR RAJA.A", reg: "95222504046", year: "II/3rd SEM" },
+            "95222504301": { name: "MOHAMMED JUMAIL.A", reg: "95222504301", year: "II/3rd SEM" },
+            "95222504302": { name: "MURUGAN.M", reg: "95222504302", year: "II/3rd SEM" },
+            "95222504303": { name: "KRISHANAKUMAR.M", reg: "95222504303", year: "II/3rd SEM" },
+            "95222504304": { name: "VIGNESH.V", reg: "95222504304", year: "II/3rd SEM" },
+
+
+
+
+            "95222404001": { name: "ATHESHAM KHAN", reg: "95222404001", year: "III/5th SEM" },
+            "95222404002": { name: "ANAND.B", reg: "95222404002", year: "III/5th SEM" },
+            "95222404003": { name: "DANIEL.Y", reg: "95222404003", year: "III/5th SEM" },
+            "95222404004": { name: "EBINRAJ.E", reg: "95222404004", year: "III/5th SEM" },
+            "9522240405": { name: "ESWARAN.S", reg: "9522240405", year: "III/5th SEM" },
+            "95222404007": { name: "JENISH.J", reg: "95222404007", year: "III/5th SEM" },
+            "95222404008": { name: "KOWSIC.A", reg: "95222404008", year: "III/5th SEM" },
+            "95222404009": { name: "MADHAVAN.S", reg: "95222404009", year: "III/5th SEM" },
+            "95222404010": { name: "MANOJ.S", reg: "95222404010", year: "III/5th SEM" },
+            "95222404011": { name: "MUTHUIYYAPPAN.M", reg: "95222404011", year: "III/5th SEM" },
+            "95222404012": { name: "RAHUL.S", reg: "95222404012", year: "III/5th SEM" },
+            "95222404013": { name: "RUSHANTHAN.P", reg: "95222404013", year: "III/5th SEM" },
+            "95222404014": { name: "SUMATHI.A", reg: "95222404014", year: "III/5th SEM" },
+            "95222404015": { name: "THIRISANGU.A", reg: "95222404015", year: "III/5th SEM" },
+            "95222404302": { name: "MOHAMMED ARSHED.J", reg: "95222404302", year: "III/5th SEM" },
+            "95222404303": { name: "RABIN CHANDRU.K", reg: "95222404303", year: "III/5th SEM" },
+            "95222404304": { name: "RAVI.R.S", reg: "95222404304", year: "III/5th SEM" },
+
+
+
+
+            "95222304001": { name: "AJAN.A", reg: "95222304001", year: "IV/7th SEM" },
+            "95222304004": { name: "ANBZHAHAN.D", reg: "95222304004", year: "IV/7th SEM" },
+            "95222304005": { name: "AUGUSTIN JEBAKUMAR.Y", reg: "95222304005", year: "IV/7th SEM" },
+            "95222304006": { name: "BALA VIGNESH.S", reg: "95222304006", year: "IV/7th SEM" },
+            "95222304008": { name: "DHARSHINI.K", reg: "95222304008", year: "IV/7th SEM" },
+            "95222304010": { name: "DINESH.D", reg: "95222304010", year: "IV/7th SEM" },
+            "95222304011": { name: "DINESH.M", reg: "95222304011", year: "IV/7th SEM" },
+            "95222304012": { name: "FRANCISTON.A", reg: "95222304012", year: "IV/7th SEM" },
+            "95222304013": { name: "GANESH KUMAR.G", reg: "95222304013", year: "IV/7th SEM" },
+            "95222304014": { name: "GOPI.R", reg: "95222304014", year: "IV/7th SEM" },
+            "95222304017": { name: "JENISH.A", reg: "95222304017", year: "IV/7th SEM" },
+            "95222304018": { name: "JERISH ROSHAN.A", reg: "95222304018", year: "IV/7th SEM" },
+            "95222304019": { name: "JOVISTON.V", reg: "95222304019", year: "IV/7th SEM" },
+            "95222304021": { name: "MAHESWARI.R", reg: "95222304021", year: "IV/7th SEM" },
+            "95222304022": { name: "MARIA STEVVA.P", reg: "95222304022", year: "IV/7th SEM" },
+            "95222304023": { name: "MARIDURAI.M", reg: "95222304023", year: "IV/7th SEM" },
+            "95222304024": { name: "MUKESH.K", reg: "95222304024", year: "IV/7th SEM" },
+            "95222304025": { name: "PARATHASARATHY.R", reg: "95222304025", year: "IV/7th SEM" },
+            "95222304026": { name: "RAJAN.P", reg: "95222304026", year: "IV/7th SEM" },
+            "95222304027": { name: "RAJESH KUMAR.S", reg: "95222304027", year: "IV/7th SEM" },
+            "95222304028": { name: "RAJKUMAR.M", reg: "95222304028", year: "IV/7th SEM" },
+            "95222304030": { name: "RITHIKA.R", reg: "95222304030", year: "IV/7th SEM" },
+            "95222304031": { name: "SAKTHI MATHESH.M", reg: "95222304031", year: "IV/7th SEM" },
+            "95222304033": { name: "SAMBENIL.D", reg: "95222304033", year: "IV/7th SEM" },
+            "95222304035": { name: "SARAVANAKUMAR.S", reg: "95222304035", year: "IV/7th SEM" },
+            "95222304036": { name: "SASIDHARAN.M", reg: "95222304036", year: "IV/7th SEM" },
+            "95222304038": { name: "SELVARAJ.S", reg: "95222304038", year: "IV/7th SEM" },
+            "95222304040": { name: "SIVARANJEETHAN.M", reg: "95222304040", year: "IV/7th SEM" },
+            "95222304041": { name: "SRIKALIDEVI.M", reg: "95222304041", year: "IV/7th SEM" },
+            "95222304042": { name: "SUDHARSAN.V", reg: "95222304042", year: "IV/7th SEM" },
+            "95222304043": { name: "VASANTHAKUMAR.M", reg: "95222304043", year: "IV/7th SEM" },
+            "95222304044": { name: "VEERAPOMMU.M", reg: "95222304044", year: "IV/7th SEM" },
+            "95222304301": { name: "ABDUL RAHUMAN.M", reg: "95222304301", year: "IV/7th SEM" },
+            "95222304302": { name: "DHEVAKUTRALAM.N", reg: "95222304302", year: "IV/7th SEM" },
+            "95222304303": { name: "MAHESH RAJA.M", reg: "95222304303", year: "IV/7th SEM" },
+            "95222304305": { name: "SURYA.S", reg: "95222304305", year: "IV/7th SEM" },
+        };
+
+ let currentPresentCounts = { "II/3rd SEM": 0, "III/5th SEM": 0, "IV/7th SEM": 0 };
+        let excelAttendanceLog = [];
+        let scannedCardsSet = new Set();
+
+        let period = "";
+        let sub1 = "", fac1 = "";
+        let sub2 = "", fac2 = "";
+        let sub3 = "", fac3 = "";
+        let isHoliday = false;
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById("clock").innerHTML = now.toLocaleTimeString();
+            document.getElementById("date").innerHTML = now.toDateString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function handleAutoReset(currentPeriodName) {
+            const todayDate = new Date().toDateString();
+            const savedDate = localStorage.getItem('lastAttendanceDate');
+            const savedPeriod = localStorage.getItem('lastAttendancePeriod');
+
+
+            if (savedDate !== todayDate) {
+                resetData();
+                localStorage.setItem('lastAttendanceDate', todayDate);
+                if (currentPeriodName) {
+                    localStorage.setItem('lastAttendancePeriod', currentPeriodName);
+                }
+                saveToLocalStorage();
+                return;
+            }
+
+            if (currentPeriodName && savedPeriod !== currentPeriodName) {
+                resetData();
+                localStorage.setItem('lastAttendanceDate', todayDate);
+                localStorage.setItem('lastAttendancePeriod', currentPeriodName);
+                saveToLocalStorage();
+            } else {
+                loadFromLocalStorage();
+            }
+        }
+
+        function resetData() {
+            localStorage.removeItem('presentCounts');
+            localStorage.removeItem('attendanceLog');
+            localStorage.removeItem('scannedCards');
+            currentPresentCounts = { "II/3rd SEM": 0, "III/5th SEM": 0, "IV/7th SEM": 0 };
+            excelAttendanceLog = [];
+            scannedCardsSet = new Set();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('presentCounts', JSON.stringify(currentPresentCounts));
+            localStorage.setItem('attendanceLog', JSON.stringify(excelAttendanceLog));
+            localStorage.setItem('scannedCards', JSON.stringify(Array.from(scannedCardsSet)));
+        }
+
+        function loadFromLocalStorage() {
+            if (localStorage.getItem('presentCounts')) {
+                currentPresentCounts = JSON.parse(localStorage.getItem('presentCounts'));
+                excelAttendanceLog = JSON.parse(localStorage.getItem('attendanceLog')) || [];
+                scannedCardsSet = new Set(JSON.parse(localStorage.getItem('scannedCards'))) || new Set();
+            }
+        }
+
+        function updateTimetable() {
+            const day = new Date().getDay();
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+
+            period = "";
+            isHoliday = false;
+
+
+            //----- MONDAY -----
+            if (day === 1) {
+                if (currentTime >= 540 && currentTime < 595) { // P1
+
+                    period = "P1 / 09:00 AM - 09:55 AM";
+                    sub1 = "EE640204-Electrical Control Systems";
+                    fac1 = "Mrs.S.Indhumathi, AP/EEE";
+
+                    sub2 = "EE660210-Digital Signal Processing in Electrical Engineering ";
+                    fac2 = "Dr.I. Daniel Thenathayalan, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 595 && currentTime < 650) { // P2
+
+                    period = "P2 / 09:55 AM - 10:50 AM";
+                    sub1 = "IC640018-Boundary Value Problems and Probability Distributions ";
+                    fac1 = "Dr.S.Durairaj,Prof/SOBES";
+
+                    sub2 = "IM660403-Professional Ethics ";
+                    fac2 = "Dr.P.K.Manikanda pirrappu, AP/MAE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 670 && currentTime < 720) { // P3
+
+                    period = "P3 / 11:10 AM - 12:00 PM";
+                    sub1 = "EE640205-DC Machines and Transformers";
+                    fac1 = "Dr. S. J. Ben Christopher, AP/EEE";
+
+                    sub2 = "EE606104-Flexible AC Transmission System ";
+                    fac2 = "Dr.S.Rajasekeran, Prof/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 720 && currentTime < 770) { // P4
+
+                    period = "P4 / 12:00 PM - 12:50 PM";
+                    sub1 = "EE640206-Linear Integrated and Digital logic Circuits ";
+                    fac1 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub2 = "EE606104-Flexible AC Transmission System";
+                    fac2 = "Dr.S.Rajasekeran, Prof/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 815 && currentTime < 860) { // P5
+                    period = "P5 / 1:35 PM - 2:20 PM";
+                    sub1 = "EC07112-Semiconductor Devices";
+                    fac1 = "Mrs.P.S.Meenambikai, AP EEE";
+
+                    sub2 = "EE606408-Virtual Instrumentation";
+                    fac2 = "Mr.S.Ramraj, ASP/EEE ";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 860 && currentTime < 905) { // p6
+
+                    period = "P6 / 02:20 PM - 03:05 PM";
+                    sub1 = "EE640502-Integrated Aptitude Skills - II";
+                    fac1 = "Mrs.P.S.Meenambikai, AP/EEE";
+
+                    sub2 = "EE606408-Virtual Instrumentation";
+                    fac2 = "Mr.S.Ramraj, ASP/EEE ";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 915 && currentTime < 960) { // P7
+
+                    period = "P7 / 03:15 PM - 04:00 PM";
+                    sub1 = "EE640205-DC Machines and Transformers";
+                    fac1 = "Dr. S. J. Ben Christopher, AP/EEE";
+
+                    sub2 = "EE660211-Solid State Drives";
+                    fac2 = "Mr.S.Balaganesh, AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+            }
+
+            //----- TUESDAY -----
+            else if (day === 2) {
+                if (currentTime >= 540 && currentTime < 595) { // P1
+
+                    period = "P1 / 09:00 AM - 09:55 AM";
+                    sub1 = "EC07112-Semiconductor Devices";
+                    fac1 = "Mrs.P.S.Meenambikai, AP EEE";
+
+                    sub2 = "EE660504-Training on Electrical Computer Aided Design";
+                    fac2 = "Mrs.V.Jenitha, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 595 && currentTime < 650) { // P2
+
+                    period = "P2 / 09:55 AM - 10:50 AM";
+                    sub1 = "IC640018-Boundary Value Problems and Probability Distributions";
+                    fac1 = "Dr.S.Durairaj,Prof/SOBES";
+
+                    sub2 = "EE660504-Training on Electrical Computer Aided Design";
+                    fac2 = "Mrs.V.Jenitha, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 670 && currentTime < 720) { // P3
+
+                    period = "P3 / 11:10 AM - 12:00 PM";
+                    sub1 = "EE640206-Linear Integrated and Digital logic Circuits ";
+                    fac1 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub2 = "EE660210-Digital Signal Processing in Electrical Engineering ";
+                    fac2 = "Dr.I.DanielThenathayalan, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 720 && currentTime < 770) { // P4
+
+                    period = "P4 / 12:00 PM - 12:50 PM";
+                    sub1 = "EE640205-DC Machines and Transformers ";
+                    fac1 = "Dr. S. J. Ben Christopher, AP/EEE";
+
+                    sub2 = "EE660211-Solid State Drives";
+                    fac2 = "Mr.S.Balaganesh, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 815 && currentTime < 860) { // P5
+
+                    period = "P5 / 1:35 PM - 2:20 PM";
+                    sub1 = "EE640204-Electrical Control Systems";
+                    fac1 = "Mrs.S.Indhumathi, AP/EEE";
+
+                    sub2 = "EC660903-Microprocessors and Interfacing";
+                    fac2 = "Dr. I.Daniel thenathayan AP/EEE  ";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 860 && currentTime < 905) { // P6
+
+                    period = "P6 / 02:20 PM - 03:05 PM";
+                    sub1 = "EE640205-DC Machines and Transformers";
+                    fac1 = "Dr. S. J. Ben Christopher, AP/EEE";
+
+                    sub2 = "EE660211-Solid State Drives";
+                    fac2 = "Mr.S.Balaganesh, AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 915 && currentTime < 960) { // P7
+
+                    period = "P7 / 03:15 PM - 04:00 PM";
+                    sub1 = "Library";
+                    fac1 = "Mrs.P.S.Meenambikai, AP EEE";
+
+                    sub2 = "Library";
+                    fac2 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+            }
+
+            //----- WEDNESDAY -----
+            else if (day === 3) {
+                if (currentTime >= 540 && currentTime < 595) { // P1
+
+                    period = "P1 / 09:00 AM - 09:55 AM";
+                    sub1 = "EE640302-DC Machines and Transformers Laboratory ";
+                    fac1 = "Dr. S. J. Ben Christopher, AP/EEE";
+
+                    sub2 = "EC660904-Microprocessor and Interfacing Laboratory";
+                    fac2 = "Dr.I.Daniel Thenathayalan, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 595 && currentTime < 650) { // P2
+
+                    period = "P2 / 09:55 AM - 10:50 AM";
+                    sub1 = "EE640303-Linear and Digital Circuits Laboratory";
+                    fac1 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub2 = "EC660904-Microprocessor and Interfacing Laboratory";
+                    fac2 = "Dr.I.Daniel Thenathayalan, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 670 && currentTime < 720) { // P3
+
+                    period = "P3 / 11:10 AM - 12:00 PM";
+                    sub1 = "EE640303-Linear and Digital Circuits Laboratory";
+                    fac1 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub2 = "EC660904-Microprocessor and Interfacing Laboratory";
+                    fac2 = "Dr.I.Daniel Thenathayalan, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 720 && currentTime < 770) { // P4
+
+                    period = "P4 / 12:00 PM - 12:50 PM";
+                    sub1 = "EE606108-Power System Planning";
+                    fac1 = "Dr.A.Shiny pradeeps, HOD/EEE";
+
+                    sub2 = "IM660403-Professional Ethics";
+                    fac2 = "Dr.P.K.Manikanda pirrappu, AP/MAE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 815 && currentTime < 860) { // P5
+
+                    period = "P5 / 1:35 PM - 02:20 PM";
+                    sub1 = "IC640018-Boundary Value Problems and Probability Distributions ";
+                    fac1 = "Dr.S.Durairaj,Prof/SOBES";
+
+                    sub2 = "EC660903-Microprocessors and Interfacing";
+                    fac2 = "Dr.I.Daniel Thenathayalan, AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 860 && currentTime < 905) { // P6
+
+                    period = "P6 / 02:20 PM - 03:05 PM";
+                    sub1 = "EE640206-Linear Integrated and Digital logic Circuits";
+                    fac1 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub2 = " CE607304-Waste to Energy Conversion";
+                    fac2 = "Mr.S.Ramraj, ASP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 915 && currentTime < 960) { // P7
+
+                    period = "P7 / 03:15 PM - 04:00 PM";
+                    sub1 = "EE640206-Linear Integrated and Digital logic Circuits";
+                    fac1 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub2 = "EE660210-Digital Signal Processing in Electrical Engineering";
+                    fac2 = "Dr.I.Daniel Thenathayalan, AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+            }
+
+            //----- THURSDAY -----
+            else if (day === 4) {
+                if (currentTime >= 540 && currentTime < 595) { // P1
+
+                    period = "P1 / 09:00 AM - 09:55 AM";
+                    sub1 = "EE640204-Electrical Control Systems";
+                    fac1 = "Mrs.S.Indhumathi, AP/EEE";
+
+                    sub2 = "EE606408-Virtual Instrumentation";
+                    fac2 = "Mr.S.Ramraj, ASP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 595 && currentTime < 650) { // P2
+
+                    period = "P2 / 09:55 AM - 10:50 AM";
+                    sub1 = "EC07112-Semiconductor Devices";
+                    fac1 = "Mrs.P.S.Meenambikai, AP EEE";
+
+                    sub2 = "EE606408-Virtual Instrumentation";
+                    fac2 = "Mr.S.Ramraj, ASP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 670 && currentTime < 720) { // P3
+
+                    period = "P3 / 11:10 AM - 12:00 PM";
+                    sub1 = "EE640205-DC Machines and Transformers";
+                    fac1 = "Dr. S. J. Ben Christopher, AP/EEE";
+
+                    sub2 = "EE606104-Flexible AC Transmission System";
+                    fac2 = "Dr.S.Rajasekeran, Prof/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 720 && currentTime < 770) { // P4
+
+                    period = "P4 / 12:00 PM - 12:50 PM";
+                    sub1 = "EE606108-Power System Planning";
+                    fac1 = "Dr.A.Shiny pradeeps, HOD/EEE";
+
+                    sub2 = "EE606104-Flexible AC Transmission System";
+                    fac2 = "Dr.S.Rajasekeran, Prof/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 815 && currentTime < 860) { // P5
+
+                    period = "P5 / 1:35 PM - 2:20 PM";
+                    sub1 = "EC07112-Semiconductor Devices";
+                    fac1 = "Mrs.P.S.Meenambikai, AP/EEE";
+
+                    sub2 = "IM660403-Professional Ethics";
+                    fac2 = "Dr.P.K.Manikanda pirrappu, AP/MAE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 860 && currentTime < 905) { // P6
+
+                    period = "P6 / 02:20 PM - 03:05 PM";
+                    sub1 = "EE640204-Electrical Control Systems";
+                    fac1 = "Mrs.S.Indhumathi, AP/EEE";
+
+                    sub2 = "EE660211-Solid State Drives";
+                    fac2 = "Mr.S.Balaganesh, AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 915 && currentTime < 960) { // P7
+
+                    period = "P7 / 03:15 PM - 04:00 PM";
+                    sub1 = "Library";
+                    fac1 = "Mrs.P.S.Meenambikai, AP EEE";
+
+                    sub2 = "CE607304-Waste to Energy Conversion";
+                    fac2 = "Mr.S.Ramraj, ASP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+            }
+
+            //----- FRIDAY -----
+            else if (day === 5) {
+                if (currentTime >= 540 && currentTime < 595) { // P1
+
+                    period = "P1 / 09:00 AM - 09:55 AM";
+                    sub1 = "EE640303-Linear and Digital Circuits Laboratory";
+                    fac1 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub2 = "EE600306-Electrical Estimation, Costing and Power Wiring Laboratory";
+                    fac2 = "Mrs.P.S.Meenambikai, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 595 && currentTime < 650) { // P2
+
+                    period = "P2 / 09:55 AM - 10:50 AM";
+                    sub1 = "EE640302-DC Machines and Transformers Laboratory";
+                    fac1 = "Dr. S. J. Ben Christopher, AP/EEE";
+
+                    sub2 = "EE600306-Electrical Estimation, Costing and Power Wiring Laboratory ";
+                    fac2 = "Mrs.P.S.Meenambikai, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 670 && currentTime < 720) { // P3
+
+                    period = "P3 / 11:10 AM - 12:00 PM";
+                    sub1 = "EE640302-DC Machines and Transformers Laboratory";
+                    fac1 = "Dr. S. J. Ben Christopher, AP/EEE";
+
+                    sub2 = "EE600306-Electrical Estimation, Costing and Power Wiring Laboratory ";
+                    fac2 = "Mrs.P.S.Meenambikai, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 720 && currentTime < 770) { // P4
+
+                    period = "P4 / 12:00 PM - 12:50 PM";
+                    sub1 = "EE606108-Power System Planning";
+                    fac1 = "Dr.A.Shiny pradeeps, HOD/EEE";
+
+                    sub2 = "EE660211-Solid State Drives";
+                    fac2 = "Mr.S.Balaganesh, AP/EEE";
+
+                    sub3 = "EE680506-PROJECT";
+                    fac3 = "Dr.A.Shiny pradeeps, HOD/EEE";
+                }
+                else if (currentTime >= 815 && currentTime < 860) { // P5
+
+                    period = "P5 / 1:35 PM - 2:20 PM";
+                    sub1 = "EE640204-Electrical Control Systems";
+                    fac1 = "Mrs.S.Indhumathi, AP/EEE";
+
+                    sub2 = "EE660210-Digital Signal Processing in Electrical Engineering ";
+                    fac2 = "Dr. I.Daniel thenathayan AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 860 && currentTime < 905) { // P6
+
+                    period = "P6 / 02:20 PM - 03:05 PM";
+                    sub1 = "EC07112-Semiconductor Devices";
+                    fac1 = "Mrs.P.S.Meenambikai, AP EEE";
+
+                    sub2 = "Library";
+                    fac2 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+                else if (currentTime >= 915 && currentTime < 960) { // P7
+
+                    period = "P7 / 03:15 PM - 04:00 PM";
+                    sub1 = "EE640206-Linear Integrated and Digital logic Circuits";
+                    fac1 = "Mr.K.Thangaraj, AP/EEE";
+
+                    sub2 = "EC660903-Microprocessors and Interfacing";
+                    fac2 = "Dr.I.Daniel Thenathayalan, AP/EEE";
+
+                    sub3 = "Library";
+                    fac3 = "Mr.M.Murugan, AP/EEE";
+                }
+            }
+            //----- WEEKEND HOLIDAY -----
+            else {
+                isHoliday = true;
+            }
+
+
+            handleAutoReset(period);
+            renderTimetableTable();
+        }
+
+        function renderTimetableTable() {
+            let abs2 = totalStrength["II/3rd SEM"] - currentPresentCounts["II/3rd SEM"];
+            let abs3 = totalStrength["III/5th SEM"] - currentPresentCounts["III/5th SEM"];
+            let abs4 = totalStrength["IV/7th SEM"] - currentPresentCounts["IV/7th SEM"];
+
+            if (isHoliday) {
+                document.getElementById("timetable").innerHTML = "<h1 class='holiday'>HOLIDAY</h1>";
+            } else if (period) {
+                document.getElementById("timetable").innerHTML = `
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>YEAR/SEMESTER</th>
+                    <th>PERIOD</th>
+                    <th>SUBJECT/CODE</th>
+                    <th>FACULTY</th>
+                    <th>PRESENT</th>
+                    <th>ABSENT</th>
+                </tr>
+                <tr>
+                    <td>II/3rd SEM</td>
+                    <td>${period}</td>
+                    <td>${sub1}</td>
+                    <td>${fac1}</td>
+                    <td style="color: #4ade80; font-weight: bold; font-size:18px;">${currentPresentCounts["II/3rd SEM"]}</td>
+                    <td style="color: #f87171; font-weight: bold; font-size:18px;">${abs2 < 0 ? 0 : abs2}</td>
+                </tr>
+                <tr>
+                    <td>III/5th SEM</td>
+                    <td>${period}</td>
+                    <td>${sub2}</td>
+                    <td>${fac2}</td>
+                    <td style="color: #4ade80; font-weight: bold; font-size:18px;">${currentPresentCounts["III/5th SEM"]}</td>
+                    <td style="color: #f87171; font-weight: bold; font-size:18px;">${abs3 < 0 ? 0 : abs3}</td>
+                </tr>
+                <tr>
+                    <td>IV/7th SEM</td>
+                    <td>${period}</td>
+                    <td>${sub3}</td>
+                    <td>${fac3}</td>
+                    <td style="color: #4ade80; font-weight: bold; font-size:18px;">${currentPresentCounts["IV/7th SEM"]}</td>
+                    <td style="color: #f87171; font-weight: bold; font-size:18px;">${abs4 < 0 ? 0 : abs4}</td>
+                </tr>
+            </table>
+        </div>`;
+            } else {
+                document.getElementById("timetable").innerHTML = "<h1 class='holiday';'>Break Time / No Class</h1>";
+            }
+        }
+
+        const barcodeSlotInput = document.getElementById('barcodeSlot');
+        const scanMessage = document.getElementById('scan-message');
+        const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+
+        barcodeSlotInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                const scannedCode = this.value.trim();
+                this.value = '';
+                if (scannedCode === '') return;
+
+                if (isHoliday || !period) {
+                    scanMessage.textContent = "Scan Rejected ❌: No active class timing right now!";
+                    scanMessage.style.color = "#f87171";
+                    return;
+                }
+
+                if (studentDatabase[scannedCode]) {
+                    const student = studentDatabase[scannedCode];
+
+                    if (scannedCardsSet.has(scannedCode)) {
+                        scanMessage.textContent = `Rejected ⚠: ${student.name} (${student.reg}) already marked!`;
+                        scanMessage.style.color = "#fbbf24";
+                    } else {
+                        scanMessage.textContent = `Logged ✓: ${student.name} [${student.year}]`;
+                        scanMessage.style.color = "#4ade80";
+
+                        const now = new Date();
+                        const entryDate = now.toISOString().split('T')[0];
+                        const entryTime = now.toTimeString().split(' ')[0];
+
+                        excelAttendanceLog.push({
+                            barcode: scannedCode,
+                            reg: student.reg,
+                            name: student.name,
+                            year: student.year,
+                            date: entryDate,
+                            time: entryTime
+                        });
+
+                        scannedCardsSet.add(scannedCode);
+
+                        if (currentPresentCounts[student.year] !== undefined) {
+                            currentPresentCounts[student.year] += 1;
+
+                            saveToLocalStorage();
+                            renderTimetableTable();
+                        }
+                    }
+                } else {
+                    scanMessage.textContent = "Error ❌: Invalid Card / Student Not Found!";
+                    scanMessage.style.color = "#f87171"
+                    // invalid card user
+                }
+            } 
+
+        });
+
+        document.addEventListener('click', () => { barcodeSlotInput.focus(); });
+
+        downloadExcelBtn.addEventListener('click', () => {
+            if (excelAttendanceLog.length === 0) {
+                alert("No attendance data logged in this session yet!");
+                return;
+            }
+            let csvHeader = "Barcode,Register No,Student Name,Year/Sem,Date,Time\n";
+            excelAttendanceLog.forEach(row => {
+                csvHeader += `"${row.barcode}","${row.reg}","${row.name}","${row.year}","${row.date}","${row.time}"\n`;
+            });
+
+            const blob = new Blob([csvHeader], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", "EEE_Smart_Attendance_Report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        updateTimetable();
+        setInterval(updateTimetable, 30000);
+
+    </script>
+</body>
+
+</html>
